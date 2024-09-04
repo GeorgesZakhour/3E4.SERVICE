@@ -1,9 +1,14 @@
-import express from 'express'
+import express from 'express';
 import dayjs from "dayjs";
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import planetRoute from './routes/planets.route.js';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const app = express();
 
-
+app.use(planetRoute);
 
 //route:/status
 app.get('/status', (req, res) => {
@@ -23,7 +28,8 @@ app.get('/date', (req, res) => {
 
     res.status(200);
     res.set('Content-type', 'text/plain');
-    res.send(dayjs());
+    const newDate = dayjs.tz(dayjs(),'Europe/Berlin').format();
+    res.send(newDate);
 });
 
 app.get('/math/:operation', (req, res) => {
