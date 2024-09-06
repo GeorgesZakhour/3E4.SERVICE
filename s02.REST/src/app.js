@@ -7,8 +7,8 @@ import planetRoute from './routes/planets.route.js';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 const app = express();
-
-app.use(planetRoute);
+app.use(express.json());
+app.use('/planets',planetRoute);
 
 //route:/status
 app.get('/status', (req, res) => {
