@@ -5,14 +5,18 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env --watch server.js"
   },
   "author": "Yannick Charron",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.3.0",
     "dayjs": "^1.11.13",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "http-errors": "^2.0.0",
+    "http-status": "^1.7.4",
+    "mangodb": "^1.0.0",
+    "mongoose": "^8.6.2"
   }
 }
