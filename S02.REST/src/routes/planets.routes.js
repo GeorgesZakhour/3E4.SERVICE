@@ -2,16 +2,21 @@ import { Router } from 'express';
 import HttpErrors from 'http-errors';
 import PLANETS from '../data/planets.js';
 import planetRepository from '../repositories/planet.repository.js';
-import methodMidllewear from '../middlewares/method.js'
+import methodMidllewear from '../middlewares/method.js';
+import httpStatus from 'http-status'; 
 const router = Router();
+
+
+
+
 
 router.get('/', methodMidllewear, async (req, res, next) => {
 
   try {
-    const transformOptions={};
+    const transformOptions = {};
     if (req.query.unit) {
       if (req.query.unit === 'c') {
-        transformOptions.unit='c';
+        transformOptions.unit = 'c';
       } else if (req.query.unit !== 'k') {
         return next(HttpErrors.BadRequest('le parametre unit doit etre c ou k'))
       }
@@ -19,7 +24,7 @@ router.get('/', methodMidllewear, async (req, res, next) => {
     let planets = await planetRepository.retriveall();
     planets = planets.map(p => {
       p = p.toObject({ getters: false, virtuals: false }); //transforme la planete de la baae de donne un object
-      p = planetRepository.transform(p,transformOptions)
+      p = planetRepository.transform(p, transformOptions)
       return p;
     });
 
@@ -30,6 +35,9 @@ router.get('/', methodMidllewear, async (req, res, next) => {
   }
 });
 
+
+
+
 //: devant dans l'url => paramètre
 router.get('/:uuidPlanet', async (req, res, next) => {
   try {
@@ -38,7 +46,7 @@ router.get('/:uuidPlanet', async (req, res, next) => {
       return next(HttpErrors.NotFound(`Planet with : ${req.params.uuidPlanet} not found`));
       return;
     }
-    planet = planet.toObject({getters:false,virtuals:false})
+    planet = planet.toObject({ getters: false, virtuals: false })
     planet = planetRepository.transform(planet);
     res.status(200).json(planet);
 
@@ -47,34 +55,37 @@ router.get('/:uuidPlanet', async (req, res, next) => {
   }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res, next) => {
 
   const newPlanet = req.body;
-
-  if (newPlanet) {
-    //On n'ajoute pas une planète vide
-    const planet = PLANETS.find((p) => p.id === newPlanet.id);
-    if (planet) {
-      //Une planète possède le id de la nouvelle planète => Pas d'ajout possible
-      return res.status(409).end();
-    }
-
-    PLANETS.push(newPlanet);
-    res.status(201).json(newPlanet);
-
+  const isEmpty = Object.keys(newPlanet).length === 0;
+  if (isEmpty) {
+    return next(HttpErrors.BadRequest('No data'));
   }
+  try {
+    let planet = await planetRepository.create(newPlanet);
+
+    planet = planet.toObject({ getters: false, virtuals: false })
+    planet = planetRepository.transform(planet);
+
+
+    res.status(201).json(planet);
+  } catch (err) {
+    return next(err);
+  }
+
 });
 
-router.delete('/:idPlanet', (req, res) => {
+router.delete('/:uuidPlanet', async (req, res,next) => {
 
-  const index = PLANETS.findIndex(p => p.id === parseInt(req.params.idPlanet, 10));
-  if (index === -1) {
-    return res.status(404).end();
+  try {
+
+    const planet = await planetRepository.delete(req.params.uuidPlanet);
+    res.status(204).end();
+
+  } catch (err) {
+    return next(err);
   }
-
-  //La planète existe
-  PLANETS.splice(index, 1);
-  res.status(204).end();
 });
 
 router.patch('/:idPlanet', (req, res) => {

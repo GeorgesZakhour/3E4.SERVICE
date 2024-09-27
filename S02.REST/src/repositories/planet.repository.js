@@ -7,6 +7,11 @@ class PlanetRepository {
     retrive(uuidPlanet) {
         return Planet.findOne({uuid: uuidPlanet});
     }
+
+
+    retriveWithCriteria(criteria) {
+        return Planet.find(criteria);
+    }
     transform(planet,option={}){
             if(option.unit){
                 if(option.unit ==='c')
@@ -19,9 +24,19 @@ class PlanetRepository {
             name:"Yannick"
         }
         delete planet._id;
+        delete planet.__v;
+
         
         return planet;
 
+    }
+
+    create(planet){
+        return Planet.create(planet);
+    }
+
+    delete(uuidPlanet){
+        return Planet.findOneAndDelete({uuid:uuidPlanet});
     }
 }
 
